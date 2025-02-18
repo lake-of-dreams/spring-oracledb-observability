@@ -1,0 +1,3 @@
+config:
+  clients:
+    - url: http://spring-oracledb-observability-loki-gateway:80/loki/api/v1/push

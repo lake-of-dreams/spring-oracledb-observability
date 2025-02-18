@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: store-manager
+  name: store-manager
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: store-manager
+  template:
+    metadata:
+      labels:
+        app: store-manager
+        version: 1.0.0
+    spec:
+      containers:
+      - env:
+        - name: otel.exporter.otlp.endpoint
+          value: http://spring-oracledb-observability-otel-opentelemetry-collector.spring-oracledb-observability:4318/v1/traces
+        - name: spring.datasource.username
+          valueFrom:
+            secretKeyRef:
+              key: spring_user
+              name: freedb-admin-secret
+        - name: spring.datasource.password
+          valueFrom:
+            secretKeyRef:
+              key: spring_pasword
+              name: freedb-admin-secret
+        - name: spring.datasource.url
+          value: jdbc:oracle:thin:@//freedb-sample:1521/FREEPDB1
+        - name: liquibase.datasource.username
+          valueFrom:
+            secretKeyRef:
+              key: liquibase_user
+              name: freedb-admin-secret
+        - name: liquibase.datasource.password
+          valueFrom:
+            secretKeyRef:
+              key: oracle_pwd
+              name: freedb-admin-secret
+        image: ghcr.io/lake-of-dreams/spring-oracledb-observability-store-manager:0.0.1-SNAPSHOT
+        imagePullPolicy: Always
+        name: store-maanger
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: store-manager
+  name: store-manager
+spec:
+  ports:
+  - name: spring
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: store-manager
+  sessionAffinity: None
+  type: ClusterIP

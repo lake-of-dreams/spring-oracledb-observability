@@ -1,0 +1,10 @@
+server:
+  extraArgs:
+   enable-feature: exemplar-storage,otlp-write-receiver
+extraScrapeConfigs: |
+  - job_name: 'spring-boot-application'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s # This can be adjusted based on our needs
+    static_configs:
+      - targets: ['store-manager.default:8080']
+  
